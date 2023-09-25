@@ -1,126 +1,127 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Button, Alert } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, Button, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MyFinances = () => {
   const [income, setIncome] = useState([]);
   const [expenses, setExpenses] = useState([]);
-
   const [newIncomeSource, setNewIncomeSource] = useState('');
   const [newIncomeAmount, setNewIncomeAmount] = useState('');
-
   const [newExpenseType, setNewExpenseType] = useState('');
   const [newExpenseAmount, setNewExpenseAmount] = useState('');
 
-  const formatNumber = (num) => {
-    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+  const fetchIncome = async () => {
+    const storedIncome = await AsyncStorage.getItem('income');
+    if (storedIncome) setIncome(JSON.parse(storedIncome));
+  };
+
+  const fetchExpenses = async () => {
+    const storedExpenses = await AsyncStorage.getItem('expenses');
+    if (storedExpenses) setExpenses(JSON.parse(storedExpenses));
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const storedIncome = JSON.parse(await AsyncStorage.getItem('income')) || [];
-      const storedExpenses = JSON.parse(await AsyncStorage.getItem('expenses')) || [];
-      
-      setIncome(storedIncome);
-      setExpenses(storedExpenses);
-    }
-
-    fetchData();
+    fetchIncome();
+    fetchExpenses();
   }, []);
 
-  const addIncome = async () => {
+  const formatNumber = (number) => {
+    return Number(number).toLocaleString('en-US');
+  };
+
+  const handleAddIncome = async () => {
     const updatedIncome = [...income, { source: newIncomeSource, amount: parseFloat(newIncomeAmount) }];
-    setIncome(updatedIncome);
     await AsyncStorage.setItem('income', JSON.stringify(updatedIncome));
+    setIncome(updatedIncome);
     setNewIncomeSource('');
     setNewIncomeAmount('');
-  }
+  };
 
-  const addExpense = async () => {
+  const handleAddExpense = async () => {
     const updatedExpenses = [...expenses, { type: newExpenseType, amount: parseFloat(newExpenseAmount) }];
-    setExpenses(updatedExpenses);
     await AsyncStorage.setItem('expenses', JSON.stringify(updatedExpenses));
+    setExpenses(updatedExpenses);
     setNewExpenseType('');
     setNewExpenseAmount('');
-  }
+  };
 
-  const deleteIncome = async (index) => {
-    const updatedIncome = [...income];
-    updatedIncome.splice(index, 1);
-    setIncome(updatedIncome);
+  const handleDeleteIncome = async (indexToDelete) => {
+    const updatedIncome = income.filter((_, index) => index !== indexToDelete);
     await AsyncStorage.setItem('income', JSON.stringify(updatedIncome));
-  }
+    setIncome(updatedIncome);
+  };
 
-  const deleteExpense = async (index) => {
-    const updatedExpenses = [...expenses];
-    updatedExpenses.splice(index, 1);
-    setExpenses(updatedExpenses);
+  const handleDeleteExpense = async (indexToDelete) => {
+    const updatedExpenses = expenses.filter((_, index) => index !== indexToDelete);
     await AsyncStorage.setItem('expenses', JSON.stringify(updatedExpenses));
-  }
+    setExpenses(updatedExpenses);
+  };
+
+  const totalIncome = income.reduce((acc, cur) => acc + cur.amount, 0);
+  const totalExpenses = expenses.reduce((acc, cur) => acc + cur.amount, 0);
+  const totalBalance = totalIncome - totalExpenses;
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.header}>MyFinances</Text>
-      
-      <View style={styles.section}>
-        <Text style={styles.title}>Income</Text>
-        {income.map((item, index) => (
-          <View key={index} style={styles.item}>
-            <Text style={styles.source}>{item.source}</Text>
-            <Text style={styles.amount}>${formatNumber(item.amount.toFixed(2))}</Text>
-            <Button title="Delete" onPress={() => deleteIncome(index)} />
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+        <Text style={styles.header}>MyFinances</Text>
+        <View style={styles.section}>
+          <Text style={styles.title}>Income</Text>
+          {income.map((item, index) => (
+            <View key={index} style={styles.item}>
+              <Text style={styles.source}>{item.source}: ${formatNumber(item.amount)}</Text>
+              <TouchableOpacity onPress={() => handleDeleteIncome(index)}>
+                <Text style={styles.deleteButton}>X</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+          <View style={styles.inputGroup}>
+            <TextInput placeholder="Source" value={newIncomeSource} onChangeText={setNewIncomeSource} style={styles.input} />
+            <TextInput placeholder="Amount" value={newIncomeAmount} onChangeText={setNewIncomeAmount} keyboardType="numeric" style={styles.input} />
+            <Button title="Add Income" onPress={handleAddIncome} />
           </View>
-        ))}
-        <TextInput
-          placeholder="Income Source"
-          value={newIncomeSource}
-          onChangeText={setNewIncomeSource}
-          style={styles.input}
-        />
-        <TextInput
-          placeholder="Amount"
-          value={newIncomeAmount}
-          onChangeText={setNewIncomeAmount}
-          keyboardType="numeric"
-          style={styles.input}
-        />
-        <Button title="Add Income" onPress={addIncome} />
-      </View>
-
-      <View style={styles.section}>
-        <Text style={styles.title}>Expenses</Text>
-        {expenses.map((item, index) => (
-          <View key={index} style={styles.item}>
-            <Text style={styles.source}>{item.type}</Text>
-            <Text style={styles.amount}>-${formatNumber(item.amount.toFixed(2))}</Text>
-            <Button title="Delete" onPress={() => deleteExpense(index)} />
+          <View style={styles.total}>
+            <Text style={styles.totalLabel}>Total Income</Text>
+            <Text style={styles.totalAmount}>${formatNumber(totalIncome)}</Text>
           </View>
-        ))}
-        <TextInput
-          placeholder="Expense Type"
-          value={newExpenseType}
-          onChangeText={setNewExpenseType}
-          style={styles.input}
-        />
-        <TextInput
-          placeholder="Amount"
-          value={newExpenseAmount}
-          onChangeText={setNewExpenseAmount}
-          keyboardType="numeric"
-          style={styles.input}
-        />
-        <Button title="Add Expense" onPress={addExpense} />
-      </View>
-
-    </ScrollView>
+        </View>
+        <View style={styles.section}>
+          <Text style={styles.title}>Expenses</Text>
+          {expenses.map((item, index) => (
+            <View key={index} style={styles.item}>
+              <Text style={styles.source}>{item.type}: ${formatNumber(item.amount)}</Text>
+              <TouchableOpacity onPress={() => handleDeleteExpense(index)}>
+                <Text style={styles.deleteButton}>X</Text>
+              </TouchableOpacity>
+            </View>
+          ))}
+          <View style={styles.inputGroup}>
+            <TextInput placeholder="Type" value={newExpenseType} onChangeText={setNewExpenseType} style={styles.input} />
+            <TextInput placeholder="Amount" value={newExpenseAmount} onChangeText={setNewExpenseAmount} keyboardType="numeric" style={styles.input} />
+            <Button title="Add Expense" onPress={handleAddExpense} />
+          </View>
+          <View style={styles.total}>
+            <Text style={styles.totalLabel}>Total Expenses</Text>
+            <Text style={styles.totalAmount}>-${formatNumber(totalExpenses)}</Text>
+          </View>
+        </View>
+        <View style={styles.balanceSection}>
+          <Text style={styles.title}>Balance</Text>
+          <Text style={styles.totalBalance}>${formatNumber(totalBalance)}</Text>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: '#F7F8FA',
+  },
+  contentContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   header: {
     fontSize: 26,
@@ -130,7 +131,7 @@ const styles = StyleSheet.create({
     color: '#6495ED'
   },
   section: {
-    marginVertical: 20,
+    marginVertical: 10,
     padding: 15,
     borderRadius: 10,
     backgroundColor: '#fff',
@@ -138,13 +139,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowOffset: { width: 0, height: 2 },
     shadowRadius: 8,
-    elevation: 3
+    elevation: 3,
   },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 15,
-    color: '#444'
+    color: '#444',
   },
   item: {
     flexDirection: 'row',
@@ -155,19 +156,59 @@ const styles = StyleSheet.create({
   },
   source: {
     fontSize: 16,
-    color: '#666'
+    color: '#666',
   },
-  amount: {
-    fontSize: 16,
-    color: '#444'
+  deleteButton: {
+    color: 'red',
+  },
+  inputGroup: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginVertical: 10,
   },
   input: {
-    borderColor: '#EDEFF2',
     borderWidth: 1,
-    borderRadius: 8,
+    borderColor: '#EDEFF2',
+    borderRadius: 4,
     padding: 10,
-    marginVertical: 10,
-  }
+    flex: 1,
+    marginRight: 10,
+  },
+  total: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 15,
+    marginTop: 10,
+    borderTopWidth: 2,
+    borderTopColor: '#DDE1E6',
+  },
+  totalLabel: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#444',
+  },
+  totalAmount: {
+    fontSize: 18,
+    color: '#444',
+  },
+  balanceSection: {
+    marginTop: 10,
+    padding: 15,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 8,
+    elevation: 3,
+    alignItems: 'center',
+  },
+  totalBalance: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#6495ED',
+  },
 });
 
 export default MyFinances;
