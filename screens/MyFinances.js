@@ -1,27 +1,65 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
-
-const mockData = {
-  income: [
-    { source: 'Salary', amount: 5000 },
-    { source: 'Other', amount: 1500 }
-  ],
-  expenses: [
-    { type: 'Rent', amount: 1200 },
-    { type: 'Food', amount: 300 },
-    { type: 'Leisure', amount: 200 }
-  ]
-};
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, ScrollView, TextInput, Button, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MyFinances = () => {
-  const { income, expenses } = mockData;
+  const [income, setIncome] = useState([]);
+  const [expenses, setExpenses] = useState([]);
 
-  const totalIncome = income.reduce((acc, cur) => acc + cur.amount, 0);
-  const totalExpenses = expenses.reduce((acc, cur) => acc + cur.amount, 0);
+  const [newIncomeSource, setNewIncomeSource] = useState('');
+  const [newIncomeAmount, setNewIncomeAmount] = useState('');
+
+  const [newExpenseType, setNewExpenseType] = useState('');
+  const [newExpenseAmount, setNewExpenseAmount] = useState('');
+
+  const formatNumber = (num) => {
+    return num.toString().replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1,');
+  };
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const storedIncome = JSON.parse(await AsyncStorage.getItem('income')) || [];
+      const storedExpenses = JSON.parse(await AsyncStorage.getItem('expenses')) || [];
+      
+      setIncome(storedIncome);
+      setExpenses(storedExpenses);
+    }
+
+    fetchData();
+  }, []);
+
+  const addIncome = async () => {
+    const updatedIncome = [...income, { source: newIncomeSource, amount: parseFloat(newIncomeAmount) }];
+    setIncome(updatedIncome);
+    await AsyncStorage.setItem('income', JSON.stringify(updatedIncome));
+    setNewIncomeSource('');
+    setNewIncomeAmount('');
+  }
+
+  const addExpense = async () => {
+    const updatedExpenses = [...expenses, { type: newExpenseType, amount: parseFloat(newExpenseAmount) }];
+    setExpenses(updatedExpenses);
+    await AsyncStorage.setItem('expenses', JSON.stringify(updatedExpenses));
+    setNewExpenseType('');
+    setNewExpenseAmount('');
+  }
+
+  const deleteIncome = async (index) => {
+    const updatedIncome = [...income];
+    updatedIncome.splice(index, 1);
+    setIncome(updatedIncome);
+    await AsyncStorage.setItem('income', JSON.stringify(updatedIncome));
+  }
+
+  const deleteExpense = async (index) => {
+    const updatedExpenses = [...expenses];
+    updatedExpenses.splice(index, 1);
+    setExpenses(updatedExpenses);
+    await AsyncStorage.setItem('expenses', JSON.stringify(updatedExpenses));
+  }
 
   return (
     <ScrollView style={styles.container}>
-      
       <Text style={styles.header}>MyFinances</Text>
       
       <View style={styles.section}>
@@ -29,13 +67,24 @@ const MyFinances = () => {
         {income.map((item, index) => (
           <View key={index} style={styles.item}>
             <Text style={styles.source}>{item.source}</Text>
-            <Text style={styles.amount}>${item.amount}</Text>
+            <Text style={styles.amount}>${formatNumber(item.amount.toFixed(2))}</Text>
+            <Button title="Delete" onPress={() => deleteIncome(index)} />
           </View>
         ))}
-        <View style={styles.total}>
-          <Text style={styles.totalLabel}>Total Income</Text>
-          <Text style={styles.totalAmount}>${totalIncome}</Text>
-        </View>
+        <TextInput
+          placeholder="Income Source"
+          value={newIncomeSource}
+          onChangeText={setNewIncomeSource}
+          style={styles.input}
+        />
+        <TextInput
+          placeholder="Amount"
+          value={newIncomeAmount}
+          onChangeText={setNewIncomeAmount}
+          keyboardType="numeric"
+          style={styles.input}
+        />
+        <Button title="Add Income" onPress={addIncome} />
       </View>
 
       <View style={styles.section}>
@@ -43,13 +92,24 @@ const MyFinances = () => {
         {expenses.map((item, index) => (
           <View key={index} style={styles.item}>
             <Text style={styles.source}>{item.type}</Text>
-            <Text style={styles.amount}>-${item.amount}</Text>
+            <Text style={styles.amount}>-${formatNumber(item.amount.toFixed(2))}</Text>
+            <Button title="Delete" onPress={() => deleteExpense(index)} />
           </View>
         ))}
-        <View style={styles.total}>
-          <Text style={styles.totalLabel}>Total Expenses</Text>
-          <Text style={styles.totalAmount}>-${totalExpenses}</Text>
-        </View>
+        <TextInput
+          placeholder="Expense Type"
+          value={newExpenseType}
+          onChangeText={setNewExpenseType}
+          style={styles.input}
+        />
+        <TextInput
+          placeholder="Amount"
+          value={newExpenseAmount}
+          onChangeText={setNewExpenseAmount}
+          keyboardType="numeric"
+          style={styles.input}
+        />
+        <Button title="Add Expense" onPress={addExpense} />
       </View>
 
     </ScrollView>
@@ -101,24 +161,13 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#444'
   },
-  total: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: 15,
-    marginTop: 15,
-    borderTopWidth: 2,
-    borderTopColor: '#DDE1E6'
-  },
-  totalLabel: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#6495ED'
-  },
-  totalAmount: {
-    fontSize: 18,
-    color: '#444'
+  input: {
+    borderColor: '#EDEFF2',
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 10,
+    marginVertical: 10,
   }
 });
 
 export default MyFinances;
-
