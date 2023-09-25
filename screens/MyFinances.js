@@ -107,7 +107,9 @@ const MyFinances = () => {
         </View>
         <View style={styles.balanceSection}>
           <Text style={styles.title}>Balance</Text>
-          <Text style={styles.totalBalance}>${formatNumber(totalBalance)}</Text>
+          <Text style={[styles.totalBalance, totalBalance >= 0 ? styles.positiveBalance : styles.negativeBalance]}>
+            ${formatNumber(totalBalance)}
+          </Text>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -128,7 +130,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
-    color: '#6495ED'
+    color: '#6495ED',
   },
   section: {
     marginVertical: 10,
@@ -207,8 +209,14 @@ const styles = StyleSheet.create({
   totalBalance: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#6495ED',
+  },
+  positiveBalance: {
+    color: '#3CB371',
+  },
+  negativeBalance: {
+    color: '#CD5C5C',
   },
 });
 
 export default MyFinances;
+
