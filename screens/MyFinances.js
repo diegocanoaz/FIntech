@@ -22,7 +22,7 @@ const MyFinances = () => {
   return (
     <ScrollView style={styles.container}>
       
-      <Text style={styles.header}>My Finances</Text>
+      <Text style={styles.header}>MyFinances</Text>
       
       <View style={styles.section}>
         <Text style={styles.title}>Income</Text>
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
-    color: '#333'
+    color: '#6495ED'
   },
   section: {
     marginVertical: 20,
@@ -112,7 +112,7 @@ const styles = StyleSheet.create({
   totalLabel: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#444'
+    color: '#6495ED'
   },
   totalAmount: {
     fontSize: 18,
