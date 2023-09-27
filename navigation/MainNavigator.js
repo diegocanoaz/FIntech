@@ -4,16 +4,10 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import My from "../screens/My";
 import MyRewards from "../screens/MyRewards";
 import MyProjects from "../screens/MyProjects";
-import MyCommunity from "../screens/MyCommunity";
+import MyCommunity from "../screens/MyCommunity";  // This will be the chat screen
 import MyFinances from "../screens/MyFinances";
-import { Entypo } from '@expo/vector-icons';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { FontAwesome } from '@expo/vector-icons';
-import { MaterialIcons } from '@expo/vector-icons';
-import { AntDesign } from '@expo/vector-icons';
-
-
-
+import ChatList from '../screens/ChatList'; // Assuming you have ChatList in the screens folder
+import { Entypo, MaterialCommunityIcons, FontAwesome, MaterialIcons, AntDesign } from '@expo/vector-icons';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -50,8 +44,8 @@ const TabNavigator = () => {
             <AntDesign name="cloud" size={40} color="cornflowerblue" />
           ),
         }}
-        />
-       <Tab.Screen
+      />
+      <Tab.Screen
         name="MyProjects"
         component={MyProjects}
         options={{
@@ -61,9 +55,9 @@ const TabNavigator = () => {
           ),
         }}
       />
-       <Tab.Screen
+      <Tab.Screen
         name="MyCommunity"
-        component={MyCommunity}
+        component={ChatList}  // Here's the change: it points to the list of chats
         options={{
           tabBarLabel: "MyCommunity",
           tabBarIcon: ({ color, size }) => (
@@ -79,15 +73,18 @@ const MainNavigator = (props) => {
   return (
     <Stack.Navigator>
       <Stack.Group>
-      <Stack.Screen
-        name="Home"
-        component={TabNavigator}
-        options={{ headerShown: false }}
-      />
-     
-   </Stack.Group>
+        <Stack.Screen
+          name="Home"
+          component={TabNavigator}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Chat"
+          component={MyCommunity}
+          options={({ route }) => ({ title: route.params.chatName })}
+        />
+      </Stack.Group>
     </Stack.Navigator>
-   
   );
 };
 
