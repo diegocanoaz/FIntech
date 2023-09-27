@@ -1,11 +1,11 @@
-// ChatList.js
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
 
 const chatData = [
-  { id: '1', name: 'Alice' },
-  { id: '2', name: 'Bob' },
-  // Add more sample chats as needed
+  { id: '1', name: 'Juan Alvaro' },
+  { id: '2', name: 'Juan Pablo' },
+  { id: '2', name: 'Diego Susumu' },
+  // ... add more sample chats as needed
 ];
 
 const ChatList = ({ navigation }) => {
@@ -15,6 +15,7 @@ const ChatList = ({ navigation }) => {
         data={chatData}
         renderItem={({ item }) => (
           <TouchableOpacity style={styles.chatItem} onPress={() => navigation.navigate('Chat', { chatName: item.name })}>
+            <View style={styles.profilePic} />
             <Text style={styles.chatName}>{item.name}</Text>
           </TouchableOpacity>
         )}
@@ -31,6 +32,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#F7F8FA'
   },
   chatItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 15,
     borderBottomColor: '#EDEFF2',
     borderBottomWidth: 1,
@@ -38,7 +41,14 @@ const styles = StyleSheet.create({
   },
   chatName: {
     fontSize: 16,
-    color: '#444'
+    color: '#444',
+    marginLeft: 15
+  },
+  profilePic: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: 'lightgrey', // Change this to whichever color you prefer for the blank profile picture
   }
 });
 
