@@ -4,7 +4,7 @@ import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native
 const chatData = [
   { id: '1', name: 'Juan Alvaro' },
   { id: '2', name: 'Juan Pablo' },
-  { id: '2', name: 'Diego Susumu' },
+  { id: '3', name: 'Diego Susumu' },
   // ... add more sample chats as needed
 ];
 
