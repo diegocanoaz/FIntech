@@ -4,10 +4,11 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import My from "../screens/My";
 import MyRewards from "../screens/MyRewards";
 import MyProjects from "../screens/MyProjects";
-import MyCommunity from "../screens/MyCommunity";  // This will be the chat screen
+import MyCommunity from "../screens/MyCommunity";
 import MyFinances from "../screens/MyFinances";
-import ChatList from '../screens/ChatList'; // Assuming you have ChatList in the screens folder
+import ChatList from '../screens/ChatList';
 import { Entypo, MaterialCommunityIcons, FontAwesome, MaterialIcons, AntDesign } from '@expo/vector-icons';
+import ProjectDetails from "../screens/ProjectDetails";
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -57,7 +58,7 @@ const TabNavigator = () => {
       />
       <Tab.Screen
         name="MyCommunity"
-        component={ChatList}  // Here's the change: it points to the list of chats
+        component={ChatList}
         options={{
           tabBarLabel: "MyCommunity",
           tabBarIcon: ({ color, size }) => (
@@ -72,18 +73,20 @@ const TabNavigator = () => {
 const MainNavigator = (props) => {
   return (
     <Stack.Navigator>
-      <Stack.Group>
-        <Stack.Screen
-          name="Home"
-          component={TabNavigator}
-          options={{ headerShown: false }}
-        />
-        <Stack.Screen
-          name="Chat"
-          component={MyCommunity}
-          options={({ route }) => ({ title: route.params.chatName })}
-        />
-      </Stack.Group>
+      <Stack.Screen
+        name="Home"
+        component={TabNavigator}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Chat"
+        component={MyCommunity}
+        options={({ route }) => ({ title: route.params.chatName })}
+      />
+      <Stack.Screen
+        name="ProjectDetails"
+        component={ProjectDetails}
+      />
     </Stack.Navigator>
   );
 };

@@ -12,7 +12,7 @@ const MyCommunity = () => {
       
       // Simulating computer response after user sends a message
       setTimeout(() => {
-        setMessages([...messages, { sender: 'user', text: input.trim() }, { sender: 'computer', text: 'Hello! How can I assist you today?' }]);
+        setMessages([...messages, { sender: 'user', text: input.trim() }, { sender: 'computer', text: 'Hola' }]);
       }, 1000);
     }
   };

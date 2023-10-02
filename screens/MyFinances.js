@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TextInput, Button, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TextInput, Button, TouchableOpacity, KeyboardAvoidingView, Platform, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MyFinances = () => {
@@ -30,19 +30,23 @@ const MyFinances = () => {
   };
 
   const handleAddIncome = async () => {
-    const updatedIncome = [...income, { source: newIncomeSource, amount: parseFloat(newIncomeAmount) }];
-    await AsyncStorage.setItem('income', JSON.stringify(updatedIncome));
-    setIncome(updatedIncome);
-    setNewIncomeSource('');
-    setNewIncomeAmount('');
+    if (newIncomeSource && newIncomeAmount) {
+      const updatedIncome = [...income, { source: newIncomeSource, amount: parseFloat(newIncomeAmount) }];
+      await AsyncStorage.setItem('income', JSON.stringify(updatedIncome));
+      setIncome(updatedIncome);
+      setNewIncomeSource('');
+      setNewIncomeAmount('');
+    }
   };
 
   const handleAddExpense = async () => {
-    const updatedExpenses = [...expenses, { type: newExpenseType, amount: parseFloat(newExpenseAmount) }];
-    await AsyncStorage.setItem('expenses', JSON.stringify(updatedExpenses));
-    setExpenses(updatedExpenses);
-    setNewExpenseType('');
-    setNewExpenseAmount('');
+    if (newExpenseType && newExpenseAmount) {
+      const updatedExpenses = [...expenses, { type: newExpenseType, amount: parseFloat(newExpenseAmount) }];
+      await AsyncStorage.setItem('expenses', JSON.stringify(updatedExpenses));
+      setExpenses(updatedExpenses);
+      setNewExpenseType('');
+      setNewExpenseAmount('');
+    }
   };
 
   const handleDeleteIncome = async (indexToDelete) => {
@@ -172,7 +176,7 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#EDEFF2',
-    borderRadius: 4,
+    borderRadius: 5,
     padding: 10,
     flex: 1,
     marginRight: 10,
@@ -180,30 +184,20 @@ const styles = StyleSheet.create({
   total: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingVertical: 15,
-    marginTop: 10,
-    borderTopWidth: 2,
-    borderTopColor: '#DDE1E6',
+    marginTop: 20,
   },
   totalLabel: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#444',
   },
   totalAmount: {
-    fontSize: 18,
+    fontSize: 16,
+    fontWeight: 'bold',
     color: '#444',
   },
   balanceSection: {
-    marginTop: 10,
-    padding: 15,
-    borderRadius: 10,
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 8,
-    elevation: 3,
+    marginVertical: 20,
     alignItems: 'center',
   },
   totalBalance: {
@@ -211,10 +205,10 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   positiveBalance: {
-    color: '#3CB371',
+    color: 'green',
   },
   negativeBalance: {
-    color: '#CD5C5C',
+    color: 'red',
   },
 });
 
